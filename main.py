@@ -1,55 +1,41 @@
-from telegram.ext.updater import Updater
-from telegram.update import Update
-from telegram.ext.callbackcontext import CallbackContext
-from telegram.ext.commandhandler import CommandHandler
-from telegram.ext.messagehandler import MessageHandler
-from telegram.ext.filters import Filters
+import telebot
+import re
+
+with open("auth.txt") as auth_file:
+    token = auth_file.read()
+
+bot = telebot.TeleBot(token=token)
 
 
-def start(update: Update, context: CallbackContext):
-    update.message.reply_text("Welcome to DUTB. See /help for all available commands")
+@bot.message_handler(commands=["start"])
+def start(message):
+    # firstname of user
+    first_name = message.from_user.first_name
+    bot.send_message(message.chat.id, f"Hello, {first_name}. Welcome to DUTB. See /help for all available commands")
 
 
-def hello_world(update: Update, context: CallbackContext):
-    update.message.reply_text("Hello World")
-
-
-def help(update: Update, context: CallbackContext):
-    update.message.reply_text(
+@bot.message_handler(commands=["help"])
+def help(message):
+    bot.send_message(
+        message.chat.id,
         """Available Commands:
-/hello_world - To get the Hello World message
-    """
+/ig_post_downloader - To download instagram post""",
     )
 
 
-def unknown_text(update: Update, context: CallbackContext):
-    update.message.reply_text(
-        "Sorry I can't recognize you , you said '%s'" % update.message.text
-    )
+@bot.message_handler(commands=["ig_post_downloader"])
+def ig_post_downloader(message):
+    sent_msg = bot.send_message(message.chat.id, "Enter post URL")
+    # next step message call url function
+    bot.register_next_step_handler(sent_msg, url_handler)
 
 
-def unknown(update: Update, context: CallbackContext):
-    update.message.reply_text("Sorry '%s' is not a valid command" % update.message.text)
+def url_handler(message):
+    url = message.text
+    if re.match("^https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$", url):
+        bot.send_message(message.chat.id, "Youre URL recieved")
+    else:
+        bot.send_message(message.chat.id, "Sorry, wrong URL. Try again")
 
 
-def main():
-    with open("auth.txt", "r") as auth_data:
-        api_token = auth_data.read()
-    updater = Updater(api_token, use_context=True)
-
-    updater.dispatcher.add_handler(CommandHandler("start", start))
-    updater.dispatcher.add_handler(CommandHandler("hello_world", hello_world))
-    updater.dispatcher.add_handler(CommandHandler("help", help))
-    # filters
-    updater.dispatcher.add_handler(MessageHandler(Filters.text, unknown))
-    updater.dispatcher.add_handler(MessageHandler(Filters.command, unknown))
-    updater.dispatcher.add_handler(MessageHandler(Filters.text, unknown_text))
-
-    #start
-    updater.start_polling()
-    #stop from ctrl+c
-    updater.idle()
-
-
-if __name__ == "__main__":
-    main()
+bot.infinity_polling()
