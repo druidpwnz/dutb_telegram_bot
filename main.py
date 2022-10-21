@@ -11,7 +11,7 @@ def start(update: Update, context: CallbackContext):
 
 
 def hello_world(update: Update, context: CallbackContext):
-    update.message.reply_text("Kuzin is a cute ASSHOLE")
+    update.message.reply_text("Hello World")
 
 
 def help(update: Update, context: CallbackContext):
@@ -40,7 +40,7 @@ def main():
     updater.dispatcher.add_handler(CommandHandler("start", start))
     updater.dispatcher.add_handler(CommandHandler("hello_world", hello_world))
     updater.dispatcher.add_handler(CommandHandler("help", help))
-    # filters block
+    # filters
     updater.dispatcher.add_handler(MessageHandler(Filters.text, unknown))
     updater.dispatcher.add_handler(MessageHandler(Filters.command, unknown))
     updater.dispatcher.add_handler(MessageHandler(Filters.text, unknown_text))
