@@ -17,20 +17,14 @@ def post_downloader(url: str):
         return False
 
 
-def profile_pic_downloader(username: str):
+def profile_content_downloader(account_name: str):
     try:
+        with open("auth_ig.txt", "r") as file:
+            login = file.readline().strip()
+            password = file.readline().strip()
         L = instaloader.Instaloader()
-        L.download_profile(username, profile_pic_only=True)
-        # default path /USERNAME/
-        return True
-    except:
-        return False
-
-
-def profile_photos_downloader(username: str):
-    try:
-        L = instaloader.Instaloader()
-        L.download_profile(username)
+        L.login(login, password)
+        L.download_profile(account_name)
         # default path /USERNAME/
         return True
     except:
@@ -39,6 +33,18 @@ def profile_photos_downloader(username: str):
 
 def hashtag_downloader(hashtag: str):
     # take a while time
-    L = instaloader.Instaloader()
-    for post in instaloader.Hashtag.from_name(L.context, hashtag).get_posts():
-        L.download_post(post, target=f"#{hashtag}")
+    try:
+        with open("auth_ig.txt", "r") as file:
+            login = file.readline().strip()
+            password = file.readline().strip()
+        L = instaloader.Instaloader()
+        L.login(login, password)
+        counter = 0
+        for post in instaloader.Hashtag.from_name(L.context, hashtag).get_posts():
+            counter += 1
+            L.download_post(post, target="{hashtag}")
+            if counter == 50:
+                break
+        return True
+    except:
+        return False
