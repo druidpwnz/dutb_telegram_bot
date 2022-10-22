@@ -134,7 +134,7 @@ def main_hashtag_downloader_handler(message):
 @bot.message_handler(commands=["proxy_getter"])
 def proxy_getter(message):
     bot.send_message(message.chat.id, "Wait a minute. Generating proxy list")
-    if proxy_getter():
+    if get_free_proxy():
         file_path = "/home/druiduser/Documents/dutb_telegram_bot/proxy_list.txt"
         file = open(file_path, "r")
         bot.send_message(message.chat.id, "Youre proxy list file:")
