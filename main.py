@@ -1,5 +1,7 @@
 import telebot
 import re
+import os
+from ig_parsers import post_downloader
 
 with open("auth.txt") as auth_file:
     token = auth_file.read()
@@ -27,13 +29,24 @@ def help(message):
 def ig_post_downloader(message):
     sent_msg = bot.send_message(message.chat.id, "Enter post URL")
     # next step message call url function
-    bot.register_next_step_handler(sent_msg, url_handler)
+    bot.register_next_step_handler(sent_msg, main_post_downloader_handler)
 
 
-def url_handler(message):
+def main_post_downloader_handler(message):
     url = message.text
     if re.match("^https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$", url):
-        bot.send_message(message.chat.id, "Youre URL recieved")
+        bot.send_message(message.chat.id, "Youre URL recieved. Processing download. If it takes a long time, try again later")
+        if post_downloader(url):
+            path = "postdir"
+            os.chdir(path)
+            for file in os.listdir():
+                if file.endswith('.jpg'):
+                    file_path = f"{path}/{file}"
+                    photo = open(file_path, 'rb')
+                    bot.send_photo(message.chat.id, photo)
+            # TODO remove sent files
+        else:
+            bot.send_message(message.chat.id, "An error corrupted. Try again a bit later")
     else:
         bot.send_message(message.chat.id, "Sorry, wrong URL. Try again")
 

@@ -6,7 +6,7 @@ def post_downloader(url: str):
         shortlink = url.lstrip("https://www.instagram.com/p/").rstrip("/")
         L = instaloader.Instaloader()
         post = instaloader.Post.from_shortcode(L.context, shortlink)
-        L.download_post(post, target=f"temp_{url}")
+        L.download_post(post, target="post_dir")
         return True
     except:
         return False
