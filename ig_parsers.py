@@ -3,10 +3,15 @@ import instaloader
 
 def post_downloader(url: str):
     try:
+        # need ig account
+        with open("auth_ig.txt", "r") as file:
+            login = file.readline().strip()
+            password = file.readline().strip()
         shortlink = url.lstrip("https://www.instagram.com/p/").rstrip("/")
         L = instaloader.Instaloader()
+        L.login(login, password)
         post = instaloader.Post.from_shortcode(L.context, shortlink)
-        L.download_post(post, target="post_dir")
+        L.download_post(post, target="temp_ig")
         return True
     except:
         return False

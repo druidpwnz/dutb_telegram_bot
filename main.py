@@ -11,9 +11,11 @@ bot = telebot.TeleBot(token=token)
 
 @bot.message_handler(commands=["start"])
 def start(message):
-    # firstname of user
     first_name = message.from_user.first_name
-    bot.send_message(message.chat.id, f"Hello, {first_name}. Welcome to DUTB. See /help for all available commands")
+    bot.send_message(
+        message.chat.id,
+        f"Hello, {first_name}. Welcome to DUTB. See /help for all available commands",
+    )
 
 
 @bot.message_handler(commands=["help"])
@@ -34,19 +36,28 @@ def ig_post_downloader(message):
 
 def main_post_downloader_handler(message):
     url = message.text
-    if re.match("^https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$", url):
-        bot.send_message(message.chat.id, "Youre URL recieved. Processing download. If it takes a long time, try again later")
+    if re.match(
+        "^https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$",
+        url,
+    ):
+        bot.send_message(
+            message.chat.id,
+            "Youre URL recieved. Processing download. If it takes a long time, try again later",
+        )
         if post_downloader(url):
-            path = "postdir"
+            # need change to project path
+            path = "/home/druiduser/Documents/dutb_telegram_bot/temp_ig"
             os.chdir(path)
             for file in os.listdir():
-                if file.endswith('.jpg'):
+                if file.endswith(".jpg"):
                     file_path = f"{path}/{file}"
-                    photo = open(file_path, 'rb')
+                    photo = open(file_path, "rb")
                     bot.send_photo(message.chat.id, photo)
-            # TODO remove sent files
+                    os.remove(file_path)
         else:
-            bot.send_message(message.chat.id, "An error corrupted. Try again a bit later")
+            bot.send_message(
+                message.chat.id, "An error occurred. Try again a bit later"
+            )
     else:
         bot.send_message(message.chat.id, "Sorry, wrong URL. Try again")
 
