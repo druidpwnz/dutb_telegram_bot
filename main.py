@@ -1,8 +1,10 @@
 import telebot
 import re
 import os
+import shutil
 from ig_parsers import post_downloader, profile_content_downloader, hashtag_downloader
 from proxy_getter import get_free_proxy
+from cryptocurrency import get_info
 
 with open("auth.txt") as auth_file:
     token = auth_file.read()
@@ -26,8 +28,9 @@ def help(message):
         """Available Commands:
 /ig_post_downloader - To download instagram post
 /ig_profile_downloader - To download all profile content
-/ig_hashtag_downloader - To download last 50 hashtag posts
-/proxy_getter - To get a proxy list file""",
+/ig_hashtag_downloader - To download last 10 hashtag posts
+/proxy_getter - To get a proxy list file
+/cryptocurrency - To show crypto currently price""",
     )
 
 
@@ -46,25 +49,23 @@ def main_post_downloader_handler(message):
     ):
         bot.send_message(
             message.chat.id,
-            "Youre URL recieved. Processing download. If it takes a long time, try again later",
+            "Processing download. If it takes a long time, try again later",
         )
         if post_downloader(url):
             # need change to project path
             path = "/home/druiduser/Documents/dutb_telegram_bot/temp_ig"
-            os.chdir(path)
-            for file in os.listdir():
+            for file in os.listdir(path):
                 if file.endswith(".jpg"):
                     file_path = f"{path}/{file}"
                     photo = open(file_path, "rb")
                     bot.send_photo(message.chat.id, photo)
                     photo.close()
-                    os.remove(file_path)
                 if file.endswith(".mp4"):
                     file_path = f"{path}/{file}"
                     video = open(file_path, "rb")
                     bot.send_video(message.chat.id, video)
                     video.close()
-                    os.remove(file_path)
+            shutil.rmtree(path)
         else:
             bot.send_message(
                 message.chat.id, "An error occurred. Try again a bit later"
@@ -81,52 +82,50 @@ def ig_profile_photos_downloader(message):
 
 def main_profile_downloader_handler(message):
     account_name = message.text
+    bot.send_message(message.chat.id, "Processing download. If it takes a long time, try again later")
     if profile_content_downloader(account_name):
         path = f"/home/druiduser/Documents/dutb_telegram_bot/{account_name}"
-        os.chdir(path)
-        for file in os.listdir():
+        for file in os.listdir(path):
             if file.endswith(".jpg"):
                 file_path = f"{path}/{file}"
                 photo = open(file_path, "rb")
                 bot.send_photo(message.chat.id, photo)
                 photo.close()
-                os.remove(file_path)
             if file.endswith(".mp4"):
                 file_path = f"{path}/{file}"
                 video = open(file_path, "rb")
                 bot.send_video(message.chat.id, video)
                 video.close()
-                os.remove(file_path)
+        shutil.rmtree(path)
     else:
         bot.send_message(message.chat.id, "An error occurred. Try again a bit later")
 
 
 @bot.message_handler(commands=["ig_hashtag_downloader"])
-def ig_profile_photos_downloader(message):
+def ig_hashtag_downloader(message):
     sent_msg = bot.send_message(message.chat.id, "Enter hashtag name")
     bot.register_next_step_handler(sent_msg, main_hashtag_downloader_handler)
 
 
 def main_hashtag_downloader_handler(message):
     hashtag = message.text
+    bot.send_message(message.chat.id, "Processing download. If it takes a long time, try again later")
     if hashtag.startswith("#"):
         hashtag = hashtag.lstrip("#")
     if hashtag_downloader(hashtag):
         path = f"/home/druiduser/Documents/dutb_telegram_bot/{hashtag}"
-        os.chdir(path)
-        for file in os.listdir():
+        for file in os.listdir(path):
             if file.endswith(".jpg"):
                 file_path = f"{path}/{file}"
                 photo = open(file_path, "rb")
                 bot.send_photo(message.chat.id, photo)
                 photo.close()
-                os.remove(file_path)
             if file.endswith(".mp4"):
                 file_path = f"{path}/{file}"
                 video = open(file_path, "rb")
                 bot.send_video(message.chat.id, video)
                 video.close()
-                os.remove(file_path)
+        shutil.rmtree(path)
     else:
         bot.send_message(message.chat.id, "An error occurred. Try again a bit later")
 
@@ -145,4 +144,9 @@ def proxy_getter(message):
         bot.send_message(message.chat.id, "An error occurred. Try again a bit later")
 
 
-bot.infinity_polling()
+@bot.message_handler(commands=["cryptocurrency"])
+def cryptocurrency(message):
+    btc, eth = get_info()
+    bot.send_message(message.chat.id, f"BTC - {btc} USD\nETH - {eth} USD")
+
+bot.polling(non_stop=True)

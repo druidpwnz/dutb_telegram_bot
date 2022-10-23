@@ -42,8 +42,8 @@ def hashtag_downloader(hashtag: str):
         counter = 0
         for post in instaloader.Hashtag.from_name(L.context, hashtag).get_posts():
             counter += 1
-            L.download_post(post, target="{hashtag}")
-            if counter == 50:
+            L.download_post(post, target=f"{hashtag}")
+            if counter == 10:
                 break
         return True
     except:
