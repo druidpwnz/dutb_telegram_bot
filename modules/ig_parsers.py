@@ -1,5 +1,3 @@
-#doesnt work autorisation
-#FIXIT install instaloader from github
 import instaloader
 
 

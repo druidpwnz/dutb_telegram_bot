@@ -1,6 +1,7 @@
 import requests
 import json
 
+
 def get_info() -> list:
     data = []
     url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest"
@@ -14,7 +15,6 @@ def get_info() -> list:
     parameters = {"slug": "ethereum", "convert": "USD"}
     response = requests.get(url, params=parameters, headers=headers)
     data.append(round(float(json.loads(response.text)["data"]["1027"]["quote"]["USD"]["price"]), 1))
-
     return data
 
 

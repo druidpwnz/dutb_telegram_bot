@@ -2,10 +2,15 @@ import telebot
 import re
 import os
 import shutil
-from modules.ig_parsers import post_downloader, profile_content_downloader, hashtag_downloader
+from modules.ig_parsers import (
+    post_downloader,
+    profile_content_downloader,
+    hashtag_downloader,
+)
 from modules.proxy_getter import get_free_proxy
 from modules.cryptocurrency import get_info
 from modules.open_weather import get_weather
+from modules.yt_downloader import yt_video_download, yt_audio_download
 
 with open("auth.txt") as auth_file:
     token = auth_file.read()
@@ -29,6 +34,8 @@ def help(message):
         """Available Commands:
 /cryptocurrency - To show crypto price
 /weather - To show current temperature
+/youtube_video_downloader - To download youtube video
+/youtube_audio_downloader - To download youtube video as audio
 /proxy_getter - To get a proxy list file
 /ig_post_downloader - To download instagram post
 /ig_profile_downloader - To download all profile content
@@ -84,7 +91,9 @@ def ig_profile_photos_downloader(message):
 
 def main_profile_downloader_handler(message):
     account_name = message.text
-    bot.send_message(message.chat.id, "Processing download. If it takes a long time, try again later")
+    bot.send_message(
+        message.chat.id, "Processing download. If it takes a long time, try again later"
+    )
     if profile_content_downloader(account_name):
         path = f"/home/druiduser/Documents/dutb_telegram_bot/{account_name}"
         for file in os.listdir(path):
@@ -111,7 +120,9 @@ def ig_hashtag_downloader(message):
 
 def main_hashtag_downloader_handler(message):
     hashtag = message.text
-    bot.send_message(message.chat.id, "Processing download. If it takes a long time, try again later")
+    bot.send_message(
+        message.chat.id, "Processing download. If it takes a long time, try again later"
+    )
     if hashtag.startswith("#"):
         hashtag = hashtag.lstrip("#")
     if hashtag_downloader(hashtag):
@@ -162,9 +173,75 @@ def main_weather_handler(message):
     city = message.text.lower()
     weather = get_weather(city)
     if weather != None:
-        bot.send_message(message.chat.id , f"Current temperature in {weather}")
+        bot.send_message(message.chat.id, f"Current temperature in {weather}")
     else:
-        bot.send_message(message.chat.id , "Wrong city name")
+        bot.send_message(message.chat.id, "Wrong city name")
+
+
+@bot.message_handler(commands=["youtube_video_downloader"])
+def youtube_video_downloader(message):
+    sent_msg = bot.send_message(message.chat.id, "Enter URL")
+    bot.register_next_step_handler(sent_msg, main_youtube_video_downloader_handler)
+
+
+def main_youtube_video_downloader_handler(message):
+    url = message.text
+    if re.match(
+        "^https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$",
+        url,
+    ):
+        bot.send_message(
+            message.chat.id,
+            "Processing download. If it takes a long time, try again later",
+        )
+        if yt_video_download(url):
+            path = "/home/druiduser/Documents/dutb_telegram_bot/cache"
+            for file in os.listdir(path):
+                if file.endswith(".mp4"):
+                    file_path = f"{path}/{file}"
+                    content = open(file_path, "rb")
+                    bot.send_video(message.chat.id ,content)
+                    content.close()
+                    os.remove(file_path)
+        else:
+            bot.send_message(
+                message.chat.id, "An error occurred. Try again a bit later"
+            )
+    else:
+        bot.send_message(message.chat.id, "Sorry, wrong URL. Try again")
+
+
+@bot.message_handler(commands=["youtube_audio_downloader"])
+def youtube_video_downloader(message):
+    sent_msg = bot.send_message(message.chat.id, "Enter URL")
+    bot.register_next_step_handler(sent_msg, main_youtube_audio_downloader_handler)
+
+
+def main_youtube_audio_downloader_handler(message):
+    url = message.text
+    if re.match(
+        "^https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$",
+        url,
+    ):
+        bot.send_message(
+            message.chat.id,
+            "Processing download. If it takes a long time, try again later",
+        )
+        if yt_audio_download(url):
+            path = "/home/druiduser/Documents/dutb_telegram_bot/cache"
+            for file in os.listdir(path):
+                if file.endswith(".mp4"):
+                    file_path = f"{path}/{file}"
+                    content = open(file_path, "rb")
+                    bot.send_audio(message.chat.id ,content)
+                    content.close()
+                    os.remove(file_path)
+        else:
+            bot.send_message(
+                message.chat.id, "An error occurred. Try again a bit later"
+            )
+    else:
+        bot.send_message(message.chat.id, "Sorry, wrong URL. Try again")
 
 
 bot.infinity_polling()
