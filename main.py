@@ -12,11 +12,7 @@ from modules.cryptocurrency import get_info
 from modules.open_weather import get_weather
 from modules.yt_downloader import yt_video_download, yt_audio_download
 
-with open("auth.txt") as auth_file:
-    token = auth_file.read()
-
-bot = telebot.TeleBot(token=token)
-
+bot = telebot.TeleBot(token="API_TOKEN")
 
 @bot.message_handler(commands=["start"])
 def start(message):
@@ -32,14 +28,14 @@ def help(message):
     bot.send_message(
         message.chat.id,
         """Available Commands:
-/cryptocurrency - To show crypto price
-/weather - To show current temperature
-/youtube_video_downloader - To download youtube video
-/youtube_audio_downloader - To download youtube video as audio
-/proxy_getter - To get a proxy list file
-/ig_post_downloader - To download instagram post
-/ig_profile_downloader - To download all profile content
-/ig_hashtag_downloader - To download last 10 hashtag posts""",
+/cryptocurrency - Show cryptocurrency price
+/weather - Show current weather
+/youtube_video_downloader - Download video from youtube
+/youtube_audio_downloader - Download audio from youtube
+/ig_post_downloader - Download post from instagram (experimental)
+/ig_profile_downloader - Download all posts from instagram profile (experimental)
+/ig_hashtag_downloader - Download last 10 posts from instagram hashtag (experimental)
+/proxy_getter - Get proxy list file""",
     )
 
 
@@ -62,7 +58,7 @@ def main_post_downloader_handler(message):
         )
         if post_downloader(url):
             # need change to project path
-            path = "/home/druiduser/Documents/dutb_telegram_bot/temp_ig"
+            path = "./cache"
             for file in os.listdir(path):
                 if file.endswith(".jpg"):
                     file_path = f"{path}/{file}"
@@ -95,7 +91,7 @@ def main_profile_downloader_handler(message):
         message.chat.id, "Processing download. If it takes a long time, try again later"
     )
     if profile_content_downloader(account_name):
-        path = f"/home/druiduser/Documents/dutb_telegram_bot/{account_name}"
+        path = f"./{account_name}"
         for file in os.listdir(path):
             if file.endswith(".jpg"):
                 file_path = f"{path}/{file}"
@@ -126,7 +122,7 @@ def main_hashtag_downloader_handler(message):
     if hashtag.startswith("#"):
         hashtag = hashtag.lstrip("#")
     if hashtag_downloader(hashtag):
-        path = f"/home/druiduser/Documents/dutb_telegram_bot/{hashtag}"
+        path = f"./cache"
         for file in os.listdir(path):
             if file.endswith(".jpg"):
                 file_path = f"{path}/{file}"
@@ -147,7 +143,7 @@ def main_hashtag_downloader_handler(message):
 def proxy_getter(message):
     bot.send_message(message.chat.id, "Wait a minute. Generating proxy list")
     if get_free_proxy():
-        file_path = "/home/druiduser/Documents/dutb_telegram_bot/proxy_list.txt"
+        file_path = "./proxy_list.txt"
         file = open(file_path, "r")
         bot.send_message(message.chat.id, "Youre proxy list file:")
         bot.send_document(message.chat.id, file)
@@ -195,14 +191,14 @@ def main_youtube_video_downloader_handler(message):
             "Processing download. If it takes a long time, try again later",
         )
         if yt_video_download(url):
-            path = "/home/druiduser/Documents/dutb_telegram_bot/cache"
+            path = "./cache"
             for file in os.listdir(path):
                 if file.endswith(".mp4"):
                     file_path = f"{path}/{file}"
                     content = open(file_path, "rb")
                     bot.send_video(message.chat.id ,content)
                     content.close()
-                    os.remove(file_path)
+            shutil.rmtree(path)
         else:
             bot.send_message(
                 message.chat.id, "An error occurred. Try again a bit later"
@@ -228,14 +224,14 @@ def main_youtube_audio_downloader_handler(message):
             "Processing download. If it takes a long time, try again later",
         )
         if yt_audio_download(url):
-            path = "/home/druiduser/Documents/dutb_telegram_bot/cache"
+            path = "./cache"
             for file in os.listdir(path):
                 if file.endswith(".mp4"):
                     file_path = f"{path}/{file}"
                     content = open(file_path, "rb")
                     bot.send_audio(message.chat.id ,content)
                     content.close()
-                    os.remove(file_path)
+            shutil.rmtree(path)
         else:
             bot.send_message(
                 message.chat.id, "An error occurred. Try again a bit later"

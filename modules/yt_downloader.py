@@ -2,7 +2,7 @@ from pytube import YouTube
 
 
 def yt_video_download(url: str):
-    path = "/home/druiduser/Documents/dutb_telegram_bot/cache"
+    path = "./cache"
     try:
         yt = YouTube(url).streams
     except:
@@ -19,7 +19,7 @@ def yt_video_download(url: str):
 
 
 def yt_audio_download(url: str):
-    path = "/home/druiduser/Documents/dutb_telegram_bot/cache"
+    path = "./cache"
     try:
         yt = YouTube(url).streams
     except:
