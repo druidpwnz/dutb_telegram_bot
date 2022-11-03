@@ -195,9 +195,12 @@ def main_youtube_video_downloader_handler(message):
             for file in os.listdir(path):
                 if file.endswith(".mp4"):
                     file_path = f"{path}/{file}"
-                    content = open(file_path, "rb")
-                    bot.send_video(message.chat.id ,content)
-                    content.close()
+                    if os.path.getsize(file_path) < 52428800:
+                        content = open(file_path, "rb")
+                        bot.send_video(message.chat.id ,content)
+                        content.close()
+                    else:
+                        bot.send_message(message.chat.id, "Sorry, the file is too large")
             shutil.rmtree(path)
         else:
             bot.send_message(
@@ -228,9 +231,12 @@ def main_youtube_audio_downloader_handler(message):
             for file in os.listdir(path):
                 if file.endswith(".mp4"):
                     file_path = f"{path}/{file}"
-                    content = open(file_path, "rb")
-                    bot.send_audio(message.chat.id ,content)
-                    content.close()
+                    if os.path.getsize(file_path) < 52428800:
+                        content = open(file_path, "rb")
+                        bot.send_audio(message.chat.id ,content)
+                        content.close()
+                    else:
+                        bot.send_message(message.chat.id, "Sorry, the file is too large")
             shutil.rmtree(path)
         else:
             bot.send_message(
